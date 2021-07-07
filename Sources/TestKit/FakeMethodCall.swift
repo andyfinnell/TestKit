@@ -45,6 +45,10 @@ public final class FakeMethodCall<P, R> {
         returnRules.append(rule)
         return self
     }
+    
+    public func resetCallHistory() {
+        callHistory = []
+    }
 }
 
 private extension FakeMethodCall {
