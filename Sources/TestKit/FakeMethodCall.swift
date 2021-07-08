@@ -58,6 +58,23 @@ public final class FakeMethodCall<P, R> {
     }
     
     @discardableResult
+    public func `return`<S, F: Error>(_ value: S, if predicate: @escaping (P) -> Bool) -> FakeMethodCall where R == Result<S, F> {
+        let rule = ReturnRule(predicate: predicate, value: .success(value))
+        returnRules.append(rule)
+        return self
+    }
+
+    @discardableResult
+    public func `return`<S, F: Error, Q: Equatable>(_ value: S, if keyPath: KeyPath<P, Q>, equals compareValue: Q) -> FakeMethodCall where R == Result<S, F> {
+        self.return(value, if: { $0[keyPath: keyPath] == compareValue })
+    }
+    
+    @discardableResult
+    public func `return`<S, F: Error>(_ value: S) -> FakeMethodCall where R == Result<S, F> {
+        self.return(value, if: { _ in true })
+    }
+
+    @discardableResult
     public func `throw`<S, F: Error>(_ error: F, if predicate: @escaping (P) -> Bool) -> FakeMethodCall where R == Result<S, F> {
         let rule = ReturnRule(predicate: predicate, value: .failure(error))
         returnRules.append(rule)
@@ -72,6 +89,11 @@ public final class FakeMethodCall<P, R> {
     @discardableResult
     public func `throw`<S, F: Error>(_ error: F) -> FakeMethodCall where R == Result<S, F> {
         self.throw(error, if: { _ in true })
+    }
+
+    @discardableResult
+    public func `throw`<S>() -> FakeMethodCall where R == Result<S, Error> {
+        self.throw(FakeError(), if: { _ in true })
     }
 
     public func resetCallHistory() {
