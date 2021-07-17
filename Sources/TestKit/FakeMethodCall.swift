@@ -46,7 +46,12 @@ public final class FakeMethodCall<P, R> {
         returnRules.append(rule)
         return self
     }
-    
+
+    @discardableResult
+    public func `return`(_ value: R, ifEqual expectedValue: P) -> FakeMethodCall where P: Equatable {
+        self.return(value, if: { $0 == expectedValue })
+    }
+
     @discardableResult
     public func `return`<Q: Equatable>(_ value: R, if keyPath: KeyPath<P, Q>, equals compareValue: Q) -> FakeMethodCall {
         self.return(value, if: { $0[keyPath: keyPath] == compareValue })
@@ -68,7 +73,12 @@ public final class FakeMethodCall<P, R> {
     public func `return`<S, F: Error, Q: Equatable>(_ value: S, if keyPath: KeyPath<P, Q>, equals compareValue: Q) -> FakeMethodCall where R == Result<S, F> {
         self.return(value, if: { $0[keyPath: keyPath] == compareValue })
     }
-    
+
+    @discardableResult
+    public func `return`<S, F: Error>(_ value: S, ifEqual compareValue: P) -> FakeMethodCall where R == Result<S, F>, P: Equatable {
+        self.return(value, if: { $0 == compareValue })
+    }
+
     @discardableResult
     public func `return`<S, F: Error>(_ value: S) -> FakeMethodCall where R == Result<S, F> {
         self.return(value, if: { _ in true })
@@ -98,6 +108,10 @@ public final class FakeMethodCall<P, R> {
 
     public func resetCallHistory() {
         callHistory = []
+    }
+    
+    func wasCalled(where predicate: (P) -> Bool) -> Bool {
+        callHistory.contains(where: { predicate($0.args)  })
     }
 }
 
