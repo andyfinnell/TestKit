@@ -1,5 +1,5 @@
 import Foundation
 
-public struct FakeError: Error {
+public struct FakeError: Error, Sendable {
     public init() {}
 }
